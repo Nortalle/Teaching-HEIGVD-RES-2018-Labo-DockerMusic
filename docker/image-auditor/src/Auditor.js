@@ -1,22 +1,12 @@
 var dgram = require('dgram');
-
+var net = require('net');
 const moment = require('moment');
 moment().format();
 
+//udp protocol
 var PROTOCOL_PORT = 9907;
 var PROTOCOL_MULTICAST_ADDRESS = "239.255.22.5";
-
-
-var instruments = new Map();
-instruments.set("ti-ta-ti", "piano");
-instruments.set("pouet", "trumpet");
-instruments.set("trulu", "flute");
-instruments.set("gzi-gzi", "violin");
-instruments.set("boum-boum", "drum");
-
 var s = dgram.createSocket('udp4');
-
-var actives = new Array();
 
 s.bind(PROTOCOL_PORT, function () {
     console.log("Joining multicast group");
@@ -24,8 +14,19 @@ s.bind(PROTOCOL_PORT, function () {
 
 });
 
-var musiciens = new Map();
+//instruments
+var instruments = new Map();
+instruments.set("ti-ta-ti", "piano");
+instruments.set("pouet", "trumpet");
+instruments.set("trulu", "flute");
+instruments.set("gzi-gzi", "violin");
+instruments.set("boum-boum", "drum");
 
+//musiciens actifs
+var actives = new Array();
+
+//tous les musiciens entendus
+var musiciens = new Map();
 
 s.on('message', function (msg, source) {
 
@@ -46,8 +47,7 @@ s.on('message', function (msg, source) {
     }
 });
 
-
-
+//Toutes les 5 secondes, on actualise le tableau des artistes actifs
 setInterval(function () {
 
     actives = new Array();
@@ -71,6 +71,7 @@ setInterval(function () {
 
 }, 5000);
 
+//serveur tcp
 var server = net.createServer(function (socket) {
         var payload = JSON.stringify(actives);
         socket.write(payload + '\r\n');
