@@ -4,6 +4,6 @@ MAINTAINER Vincent Guidoux <vincent.guidoux1@heig-vd.ch>
 COPY src /opt/app/
 
 WORKDIR /opt/app/
-RUN ["npm","install","moment"]
+RUN ["npm","install","moment","--save"]
 
 ENTRYPOINT ["node", "/opt/app/Auditor.js"]
