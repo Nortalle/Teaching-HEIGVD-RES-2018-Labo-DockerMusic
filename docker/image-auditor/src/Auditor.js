@@ -69,7 +69,7 @@ setInterval(function () {
 
 
 
-}, 5000);
+}, 4000);
 
 //serveur tcp
 var server = net.createServer(function (socket) {
