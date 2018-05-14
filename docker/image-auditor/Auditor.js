@@ -1,39 +1,71 @@
 var dgram = require('dgram');
+const moment = require('moment');
+moment().format();
 
 var PROTOCOL_PORT = 9907;
 var PROTOCOL_MULTICAST_ADDRESS = "239.255.22.5";
 
 var instruments = new Map();
-instruments.set("piano", "ti-ta-ti");
-instruments.set("trumpet", "pouet");
-instruments.set("flute", "trulu");
-instruments.set("violin", "gzi-gzi");
-instruments.set("drum", "boum-boum");
+instruments.set("ti-ta-ti", "piano");
+instruments.set("pouet", "trumpet");
+instruments.set("trulu", "flute");
+instruments.set("gzi-gzi", "violin");
+instruments.set("boum-boum", "drum");
 
 var s = dgram.createSocket('udp4');
 
-s.bind(PROTOCOL_PORT, function() {
-    console.log("Joining multicast gorup");
+var actives = new Array();
+
+s.bind(PROTOCOL_PORT, function () {
+    console.log("Joining multicast group");
     s.addMembership(PROTOCOL_MULTICAST_ADDRESS);
 
 });
 
-var MusicienInstrument = new Map();
-var MusicienActiveSince = new Map();
-var MusicienActive = new Map();
-
-s.on('message', function(msg, source) {
-    console.log("Data has arrived: " + msg);
-
-    var musician = JSON.parse(msg);
-    var uuid = musician.uuid;
-
-    if(MusicienInstrument.has(musician.uuid))
-        MusicienActive.set()
+var musiciens = new Map();
 
 
+s.on('message', function (msg, source) {
 
-    console.log("Son: " + message.uuid);
+    var musicianTMP = JSON.parse(msg);
 
+    if (!musiciens.has(musicianTMP.uuid)) {
+
+        var musician = new Object();
+
+        musician.uuid = musicianTMP.uuid;
+        musician.instrument = instruments.get(musicianTMP.sound);
+        musician.activeSince = moment();
+        musician.active = true;
+
+        musiciens.set(musician.uuid, musician);
+    } else {
+        musiciens.get(musicianTMP.uuid).active = true;
+    }
 });
+
+
+
+setInterval(function () {
+
+
+    musiciens.forEach(function forAll(value,key, map){
+        if(musiciens.get(key).active){
+
+            var musicianTMP = new Object();
+            musicianTMP.uuid = musiciens.get(key).uuid;
+            musicianTMP.instrument = musiciens.get(key).instrument;
+            musicianTMP.activeSince = musiciens.get(key).activeSince;
+
+            actives.push(musicianTMP);
+            musiciens.get(key).active = false;
+        }
+    });
+
+    console.log( JSON.stringify(actives));
+
+    actives = new Array();
+
+
+}, 5000);
 
