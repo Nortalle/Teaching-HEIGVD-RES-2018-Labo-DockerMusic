@@ -1,9 +1,11 @@
 var dgram = require('dgram');
+
 const moment = require('moment');
 moment().format();
 
 var PROTOCOL_PORT = 9907;
 var PROTOCOL_MULTICAST_ADDRESS = "239.255.22.5";
+
 
 var instruments = new Map();
 instruments.set("ti-ta-ti", "piano");
@@ -48,6 +50,7 @@ s.on('message', function (msg, source) {
 
 setInterval(function () {
 
+    actives = new Array();
 
     musiciens.forEach(function forAll(value,key, map){
         if(musiciens.get(key).active){
@@ -64,8 +67,16 @@ setInterval(function () {
 
     console.log( JSON.stringify(actives));
 
-    actives = new Array();
 
 
 }, 5000);
+
+var server = net.createServer(function (socket) {
+        var payload = JSON.stringify(actives);
+        socket.write(payload + '\r\n');
+        socket.pipe(socket);
+        socket.end();
+    });
+
+    server.listen(2205, '0.0.0.0');
 
